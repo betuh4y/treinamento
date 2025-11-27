@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QC-ML Simulator - Inspeção de Qualidade</title> 
-    
+    <title>QC-ML Simulator - Inspeção de Qualidade</title>
+   
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
       import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
       import { getDatabase, ref, set, get, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
       const firebaseConfig = {
         apiKey: "AIzaSyDJBdK9I-jtg9ujTc9Xsxr-hnPfkId4wIU",
         authDomain: "pdv1-77632.firebaseapp.com",
@@ -19,11 +18,10 @@
         messagingSenderId: "246033791117",
         appId: "1:246033791117:web:7b70b511ea8d8c5ba1cac4"
       };
-
       const app = initializeApp(firebaseConfig);
       window.auth = getAuth(app);
       window.db = getDatabase(app);
-      
+     
       window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
       window.signInWithEmailAndPassword = signInWithEmailAndPassword;
       window.onAuthStateChanged = onAuthStateChanged;
@@ -31,15 +29,14 @@
       window.ref = ref;
       window.set = set;
       window.push = push;
-      window.onValue = onValue; 
-      window.get = get; 
-      
-      window.authInstance = getAuth(app); 
+      window.onValue = onValue;
+      window.get = get;
+     
+      window.authInstance = getAuth(app);
     </script>
-
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.0.0/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
-    
+   
     <style>
         /* Cores Padrão */
         :root {
@@ -49,16 +46,14 @@
             --cor-fundo-escuro: #1a1a1a;
             --cor-card-fundo: #2a2a2a;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            background: linear-gradient(135deg, #000, var(--cor-fundo-escuro)); 
-            color: #fff; font-family: 'Arial', sans-serif; 
+        body {
+            background: linear-gradient(135deg, #000, var(--cor-fundo-escuro));
+            color: #fff; font-family: 'Arial', sans-serif;
             overflow-x: hidden;
             transition: filter 0.3s;
             min-height: 100vh;
         }
-
         /* --- LOGIN SECTION --- */
         #loginSection {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -72,7 +67,7 @@
             box-shadow: 0 0 20px rgba(0,255,136,0.3);
             width: 100%; max-width: 400px; text-align: center;
         }
-        .login-box h2 { color: var(--cor-principal); margin-bottom: 20px; text-shadow: 0 0 5px var(--cor-principal); } 
+        .login-box h2 { color: var(--cor-principal); margin-bottom: 20px; text-shadow: 0 0 5px var(--cor-principal); }
         .login-box input {
             width: 100%; padding: 12px; margin: 10px 0; border: none;
             border-radius: 10px; background: rgba(255,255,255,0.15);
@@ -86,41 +81,38 @@
         .login-box button:hover { background: #00cc66; }
         .tab-btn { background: none; border: none; color: var(--cor-principal); font-size: 14px; margin: 0 10px; cursor: pointer; }
         .tab-btn.active { text-decoration: underline; font-weight: bold; }
-
         /* --- MAIN SYSTEM LAYOUT (GRID) --- */
-        #mainSystem { 
+        #mainSystem {
             display: grid;
-            grid-template-columns: 1fr 350px; 
+            grid-template-columns: 1fr 350px;
             gap: 30px;
             padding: 30px;
-            max-width: 1400px; 
+            max-width: 1400px;
             margin: 0 auto;
-            min-height: 100vh; 
+            min-height: 100vh;
             display: none;
         }
-
         /* Coluna da Câmera e Controles */
         #camera-controls-column {
-            display: flex; 
+            display: flex;
             flex-direction: column;
             align-items: center;
             width: 100%;
-            padding-top: 0; 
+            padding-top: 0;
         }
-
         /* --- CONTROLES SUPERIORES (FIXOS) --- */
-        #super-controls { 
-            position: fixed; 
-            top: 30px; 
-            right: 30px; 
-            display: flex; 
-            gap: 10px; 
-            background: rgba(0,0,0,0.8); 
-            padding: 10px; 
+        #super-controls {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            display: flex;
+            gap: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
             border-radius: 15px;
-            z-index: 1000; 
+            z-index: 1000;
         }
-        #super-controls button { 
+        #super-controls button {
             padding: 8px 12px; font-size: 16px; min-width: 40px;
             background: #333; color: white; border: 1px solid #555;
             border-radius: 8px; cursor: pointer;
@@ -128,61 +120,59 @@
         #super-controls button:hover { background: #555; }
         #emergency-stop { background: var(--cor-erro) !important; font-weight: bold; }
         #logout-btn { background: #ff6b6b !important; }
-
         /* --- CÂMERA E IA --- */
         #webcam-container {
-            display: flex; 
-            justify-content: center; 
+            display: flex;
+            justify-content: center;
             margin: 20px 0;
             min-height: 400px;
             width: 100%;
-            display: none; 
+            display: none;
         }
         canvas {
             border: 4px solid var(--cor-principal); border-radius: 15px;
             box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
             max-width: 100%;
-            display: none; 
+            display: none;
         }
-        
+       
         /* --- DISPLAY DE PORCENTAGEM (LIMPO E MODERNO) --- */
         #confidence-display {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: 1.8rem; 
+            font-size: 1.8rem;
             font-weight: 700;
             text-align: center;
             padding: 15px;
-            margin-top: 15px; 
+            margin-top: 15px;
             margin-bottom: 20px;
-            background: #111; 
+            background: #111;
             border-radius: 12px;
-            min-height: 60px; 
+            min-height: 60px;
             width: 100%;
             max-width: 500px;
-            color: #fff; 
+            color: #fff;
             border: 2px solid #333;
-            display: none; 
+            display: none;
             letter-spacing: 1px; /* Espaçamento entre letras */
             /* Centraliza o texto verticalmente */
             display: flex;
             align-items: center;
             justify-content: center;
         }
-
         /* STATUS E LOG */
-        #status { 
-            font-size: 20px; text-align: center; padding: 15px; 
-            background: rgba(0, 0, 0, 0.8); margin: 15px auto; 
+        #status {
+            font-size: 20px; text-align: center; padding: 15px;
+            background: rgba(0, 0, 0, 0.8); margin: 15px auto;
             border-radius: 15px; max-width: 600px;
             border: 1px solid #333;
             width: 100%;
-            position: relative; 
+            position: relative;
         }
-        
+       
         .btn-group { margin: 20px 0; }
-        button.action-btn { 
-            padding: 15px 30px; margin: 0 10px; border: none; 
-            border-radius: 25px; cursor: pointer; font-size: 16px; 
+        button.action-btn {
+            padding: 15px 30px; margin: 0 10px; border: none;
+            border-radius: 25px; cursor: pointer; font-size: 16px;
             font-weight: bold; transition: all 0.3s;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
@@ -191,9 +181,9 @@
         #start-btn:hover { background: #3a7fd1; }
         #reset-btn { background: var(--cor-erro); color: white; }
         #reset-btn:hover { background: #cc5454; }
-        
+       
         /* CONTADORES */
-        .counters { 
+        .counters {
             display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;
             margin: 30px 0; font-size: 18px; text-align: center;
             width: 100%;
@@ -213,40 +203,41 @@
         }
         #esteira-status {
              font-weight: bold;
-             color: white; 
-             font-size: 24px; 
+             color: white;
+             font-size: 24px;
              padding: 10px 20px;
              border-radius: 10px;
         }
-
         /* --- DASHBOARD LATERAL --- */
         #stats-dashboard-column {
             padding: 25px;
             background: var(--cor-fundo-escuro);
             border-radius: 15px;
             border: 2px solid var(--cor-principal);
-            box-shadow: 0 0 25px rgba(0, 255, 136, 0.4); 
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.4);
             text-align: left;
-            height: fit-content; 
-            position: sticky; 
-            top: 30px; 
+            height: fit-content;
+            position: sticky;
+            top: 30px;
+            overflow-y: auto;
+            max-height: 90vh;
         }
-        
+       
         #stats-dashboard-column h3 {
-            color: var(--cor-principal); 
+            color: var(--cor-principal);
             border-bottom: 2px solid var(--cor-principal);
             padding-bottom: 10px;
             margin-bottom: 15px;
             text-shadow: 0 0 3px rgba(0, 255, 136, 0.7);
         }
-        
+       
         #historical-log-container {
-             display: none; 
+             display: none;
              margin-top: 20px;
         }
         #commands-log {
-             max-height: 350px; 
-             overflow-y: auto; 
+             max-height: 350px;
+             overflow-y: auto;
              padding: 10px;
              background: #111;
              border-radius: 8px;
@@ -258,22 +249,20 @@
             border-bottom: 1px dashed #333;
             color: #aaa;
         }
-        
+       
         #toggle-log-btn {
-            background: var(--cor-secundaria); 
-            color: white; 
+            background: var(--cor-secundaria);
+            color: white;
             padding: 12px 15px;
             border: none;
             border-radius: 10px;
             width: 100%;
             cursor: pointer;
             font-weight: bold;
-            margin-top: 20px; 
+            margin-top: 20px;
             transition: background 0.3s;
         }
         #toggle-log-btn:hover { background: #3a7fd1; }
-
-
         .realtime-stat-block {
             padding: 12px;
             border-radius: 8px;
@@ -284,14 +273,14 @@
             align-items: center;
             border-left: 5px solid var(--cor-principal);
         }
-        
+       
         #realtime-taxa { border-left-color: var(--cor-secundaria); }
         .realtime-stat-block strong {
-            font-size: 1.8rem; 
+            font-size: 1.8rem;
             color: var(--cor-principal);
             font-weight: bolder;
         }
-        
+       
         #realtime-danificado {
             color: var(--cor-erro) !important;
             border-left-color: var(--cor-erro) !important;
@@ -299,24 +288,75 @@
         #realtime-danificado strong {
             color: var(--cor-erro) !important;
         }
-
+        /* NOVOS ESTILOS PARA RELATÓRIOS E RANKING */
+        #reports-section, #top-operators {
+            margin: 20px 0;
+            padding: 15px;
+            background: var(--cor-card-fundo);
+            border-radius: 10px;
+            border-left: 4px solid var(--cor-secundaria);
+        }
+        #period-select {
+            padding: 10px;
+            background: #333;
+            color: white;
+            border: 1px solid var(--cor-secundaria);
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        #generate-report, #update-ranking, #send-whatsapp {
+            background: var(--cor-secundaria);
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        #generate-report:hover, #update-ranking:hover { background: #3a7fd1; }
+        #send-whatsapp { 
+            background: #25D366 !important; 
+            width: 100%; 
+            margin-top: 10px;
+            display: none;
+        }
+        #send-whatsapp:hover { background: #128C7E !important; }
+        #report-display {
+            margin: 10px 0;
+            padding: 15px;
+            background: #111;
+            border-radius: 8px;
+            border: 1px solid #555;
+        }
+        #report-display p { margin: 5px 0; font-size: 16px; }
+        #ranking-list {
+            list-style: none;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        #ranking-list li {
+            padding: 8px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+        }
+        #ranking-list li strong { color: var(--cor-principal); }
         /* --- TELA INICIAL PÓS-LOGIN --- */
         #startScreen {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center; 
+            justify-content: center;
             width: 100%;
-            margin-top: 50px; 
+            margin-top: 50px;
         }
-
         /* CONFIG BOX */
         .quick-config-box {
             background: rgba(26, 26, 26, 0.9);
             padding: 30px;
             border-radius: 15px;
-            border: 1px solid #444; 
+            border: 1px solid #444;
             width: 100%;
             max-width: 450px;
             margin-bottom: 30px;
@@ -328,28 +368,27 @@
             width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px;
             border: 1px solid #555; background: #333; color: white; font-size: 16px;
         }
-
         /* ITENS DE PRODUÇÃO ATIVA */
         #activeProduction {
-            display: none; 
-            width: 100%; 
-            display: flex; 
-            flex-direction: column; 
+            display: none;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            padding-top: 0; 
+            padding-top: 0;
         }
-        
-        #status-active { 
-            padding: 10px; 
-            background: var(--cor-card-fundo); 
+       
+        #status-active {
+            padding: 10px;
+            background: var(--cor-card-fundo);
             border-radius: 8px;
-            width: 100%; 
+            width: 100%;
             max-width: 600px;
             text-align: center;
-            margin-bottom: 20px; 
-            margin-top: 30px; 
+            margin-bottom: 20px;
+            margin-top: 30px;
         }
-        
+       
         /* Estilos Toast */
         .toast {
             position: fixed; bottom: 20px; right: 20px;
@@ -361,27 +400,23 @@
         .toast.show { opacity: 1; transform: translateY(0); }
         .toast.success { background: var(--cor-principal); color: black; font-weight: bold; }
         .toast.error { background: var(--cor-erro); color: black; font-weight: bold; }
-        
+       
     </style>
 </head>
 <body>
-
     <div id="loginSection">
         <div class="login-box">
-            <h2>SISTEMA DE INSPEÇÃO</h2> 
+            <h2>SISTEMA DE INSPEÇÃO</h2>
             <p>Controle de Qualidade Automático</p>
-
             <div style="margin: 20px 0;">
                 <button class="tab-btn active" onclick="showTab('login')">Login</button>
                 <button class="tab-btn" onclick="showTab('register')">Cadastrar</button>
             </div>
-
             <div id="loginForm">
                 <input type="email" id="loginEmail" placeholder="Email" />
                 <input type="password" id="loginPassword" placeholder="Senha" />
                 <button onclick="handleLogin()">ENTRAR</button>
             </div>
-
             <div id="registerForm" style="display: none;">
                 <input type="text" id="regName" placeholder="Nome completo" />
                 <input type="tel" id="regPhone" placeholder="Telefone (DDD)" />
@@ -391,142 +426,148 @@
             </div>
         </div>
     </div>
-    
+   
     <div id="super-controls" style="display: none;">
         <button id="emergency-stop" title="Emergência">🛑</button>
         <button id="logout-btn" title="Encerrar Turno e Sair">🚪</button>
     </div>
-
     <div id="mainSystem">
-        
+       
         <div id="camera-controls-column">
-            
+           
             <div id="startScreen">
-                
+               
                 <div id="status">Aguardando configuração do turno...</div>
-
                 <div class="quick-config-box">
                     <h3>Dados do Turno</h3>
-                    
+                   
                     <div style="text-align: center; margin-bottom: 20px; padding: 10px; background: #111; border-radius: 8px;">
                         <p style="margin: 0; color: #ccc;">Operador Logado:</p>
-                        <h3 id="displayOperatorName" style="color: var(--cor-principal); margin: 5px 0 0 0;">N/A</h3> 
+                        <h3 id="displayOperatorName" style="color: var(--cor-principal); margin: 5px 0 0 0;">N/A</h3>
                     </div>
-                    
+                   
                     <label for="input-maquina">Tipo/Nome da Máquina</label>
                     <input type="text" id="input-maquina" value="Esteira de Qualidade - Linha A" required>
-
                     <label for="input-meta">Meta de Produção (Peças)</label>
                     <input type="number" id="input-meta" placeholder="Ex: 10000" min="100" required>
+                    <label for="whatsapp-num">WhatsApp Supervisor (55dd9xxxxxxxx)</label>
+                    <input type="tel" id="whatsapp-num" value="" placeholder="Ex: 5511999999999">
                 </div>
-
                 <div class="btn-group">
                     <button id="start-btn" class="action-btn">INICIAR ESTEIRA / TURNO</button>
                     <button id="reset-btn" class="action-btn">RESET CONTADORES</button>
                 </div>
-                
+               
                 <div class="counters">
                     <div class="counter-item">🖊️ Canetas: <strong id="count-caneta">0</strong></div>
                     <div class="counter-item">⚠️ Danificados: <strong id="count-danificado">0</strong></div>
                     <div class="counter-item" id="esteira-status" style="background: var(--cor-erro);">PARADA</div>
                 </div>
             </div>
-
             <div id="activeProduction">
-                <div id="status-active" style="padding: 10px; background: #222; border-radius: 8px;">TURNO ATIVO</div> 
+                <div id="status-active" style="padding: 10px; background: #222; border-radius: 8px;">TURNO ATIVO</div>
                 <div id="webcam-container"></div>
                 <div id="confidence-display" style="display: none;">AGUARDANDO...</div>
             </div>
         </div>
-
         <div id="stats-dashboard-column">
             <h3>📈 Produção em Tempo Real 🕒</h3>
-            
+           
             <div id="turno-info" style="margin-bottom: 20px; font-size: 0.9rem; color: #ccc;">
-                <p>Operador: <strong id="display-operador" style="color: white;">N/A</strong></p> 
+                <p>Operador: <strong id="display-operador" style="color: white;">N/A</strong></p>
                 <p>Máquina: <strong id="display-maquina" style="color: white;">N/A</strong></p>
                 <p>Meta: <strong id="display-meta" style="color: white;">0</strong> peças</p>
             </div>
             <hr style="border-color: #555;">
-
             <div class="realtime-stat-block">
                 <span>Total Aprovado:</span>
                 <strong id="realtime-caneta">0</strong>
             </div>
-
             <div class="realtime-stat-block" id="realtime-danificado">
                 <span>Total Rejeitado:</span>
                 <strong id="realtime-danificado-val">0</strong>
             </div>
-
             <div class="realtime-stat-block">
                 <span>Total Processado:</span>
                 <strong id="realtime-total">0</strong>
             </div>
-
             <div class="realtime-stat-block" id="realtime-taxa">
                 <span>Taxa de Rejeição:</span>
                 <strong>0.00%</strong>
             </div>
-            
-            <button id="toggle-log-btn" onclick="toggleHistoricalLog()">Mostrar Histórico de Ações</button>
 
+            <!-- NOVA SEÇÃO DE RELATÓRIOS COM FILTROS -->
+            <div id="reports-section">
+                <h3>📊 Relatórios por Período</h3>
+                <select id="period-select">
+                    <option value="dia">Hoje</option>
+                    <option value="semana">Esta Semana</option>
+                    <option value="mes">Este Mês</option>
+                </select>
+                <button id="generate-report">Gerar Relatório</button>
+                <div id="report-display" style="display:none;"></div>
+                <button id="send-whatsapp">📱 Enviar WhatsApp</button>
+            </div>
+
+            <!-- NOVA SEÇÃO DE TOP OPERADORES -->
+            <div id="top-operators">
+                <h3>🥇 Top Operadores (Lifetime)</h3>
+                <button id="update-ranking">Atualizar Ranking</button>
+                <ul id="ranking-list"></ul>
+            </div>
+           
+            <button id="toggle-log-btn" onclick="toggleHistoricalLog()">Mostrar Histórico de Ações</button>
             <div id="historical-log-container">
                 <h3 style="margin-top: 30px;">📄 Histórico de Ações</h3>
                 <div id="commands-log"></div>
             </div>
             </div>
     </div>
-
     <div id="toast" class="toast"></div>
-
     <script type="module">
         // === CONFIGURAÇÕES ===
-        const URL_MODEL = "./my_model/"; 
-        const CONFIRMATION_TIME = 1500; 
-        const MIN_PROB = 0.90; 
-
+        const URL_MODEL = "./my_model/";
+        const CONFIRMATION_TIME = 1500;
+        const MIN_PROB = 0.90;
         // === VARIÁVEIS GLOBAIS ===
         let model, webcam, maxPredictions;
         let isPaused = false;
         let esteiraParada = true;
-        
+       
         let countCaneta = 0;
-        let countDanificado = 0; 
+        let countDanificado = 0;
         let detectionStartTime = {};
-        let ultimoObjetoDetectado = null; 
-
+        let ultimoObjetoDetectado = null;
         let currentUser = null;
         let sessionId = null;
-        
-        let currentOperatorName = 'N/A'; 
-
+       
+        let currentOperatorName = 'N/A';
         let turnoConfig = {
             operador: 'N/A',
             maquina: 'N/A',
-            metaPecas: 0
+            metaPecas: 0,
+            whatsappNum: ''
         };
-
         // Elementos UI
         const loginSectionEl = document.getElementById('loginSection');
         const mainSystemEl = document.getElementById('mainSystem');
         const startScreenEl = document.getElementById('startScreen');
         const activeProductionEl = document.getElementById('activeProduction');
         const statusEl = document.getElementById("status");
-        const statusActiveEl = document.getElementById("status-active"); 
+        const statusActiveEl = document.getElementById("status-active");
         const startBtn = document.getElementById("start-btn");
         const countCanetaEl = document.getElementById("count-caneta");
-        const countDanificadoEl = document.getElementById("count-danificado"); 
+        const countDanificadoEl = document.getElementById("count-danificado");
         const esteiraStatusEl = document.getElementById("esteira-status");
-        const commandsLogEl = document.getElementById("commands-log"); 
+        const commandsLogEl = document.getElementById("commands-log");
         const historicalLogContainerEl = document.getElementById("historical-log-container");
         const toggleLogBtn = document.getElementById("toggle-log-btn");
         const webcamContainerEl = document.getElementById('webcam-container');
-        const superControlsEl = document.getElementById('super-controls'); 
-        const displayOperatorNameEl = document.getElementById('displayOperatorName'); 
-        const confidenceDisplayEl = document.getElementById('confidence-display'); 
+        const superControlsEl = document.getElementById('super-controls');
+        const displayOperatorNameEl = document.getElementById('displayOperatorName');
+        const confidenceDisplayEl = document.getElementById('confidence-display');
         const realtimeDanificadoValEl = document.getElementById('realtime-danificado-val');
-        
+       
         // --- FUNÇÕES DE LOGIN ---
         window.showTab = (tab) => {
             document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
@@ -534,59 +575,53 @@
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             event.target.classList.add('active');
         };
-
         window.handleLogin = async () => {
             const email = document.getElementById('loginEmail').value;
             const pass = document.getElementById('loginPassword').value;
-            
+           
             if (!email || !pass) {
                 showToast("Preencha email e senha.", 'error');
                 return;
             }
-
             try {
                 await window.signInWithEmailAndPassword(window.authInstance, email, pass);
                 showToast("Tentando Login...", 'success');
-
-            } catch(e) { 
+            } catch(e) {
                 let errorMessage = 'Erro ao logar. Verifique as credenciais.';
                 if (e.code === 'auth/wrong-password') {
                     errorMessage = 'Senha incorreta.';
                 } else if (e.code === 'auth/user-not-found') {
                     errorMessage = 'Usuário não encontrado. Cadastre-se.';
                 }
-                showToast(errorMessage, 'error'); 
+                showToast(errorMessage, 'error');
             }
         };
-
         window.handleRegister = async () => {
             const name = document.getElementById('regName').value.trim();
             const phone = document.getElementById('regPhone').value.trim();
             const email = document.getElementById('regEmail').value.trim();
             const pass = document.getElementById('regPassword').value;
-            
+           
             if(!name || pass.length < 6) {
                 showToast("Preencha nome e senha (mín. 6 caracteres)", "error");
                 return;
             }
-
             try {
                 const userCredential = await window.createUserWithEmailAndPassword(window.authInstance, email, pass);
                 const uid = userCredential.user.uid;
-                
+               
                 await window.set(window.ref(window.db, `users/${uid}`), {
                     name: name,
                     phone: phone,
                     email: email,
                     role: 'operator'
                 });
-
                 showToast("Usuário criado com sucesso! Faça login.", "success");
-            } catch(e) { 
-                showToast(e.message, 'error'); 
+            } catch(e) {
+                showToast(e.message, 'error');
             }
         };
-        
+       
         // --- BUSCA E EXIBIÇÃO DO NOME DO OPERADOR ---
         async function fetchUserName(uid) {
             try {
@@ -604,87 +639,83 @@
                 console.error("Erro ao buscar nome do usuário:", e);
             }
         }
-
         // --- GESTÃO DE ESTADO (Transição de Tela) ---
         window.onAuthStateChanged(window.authInstance, async (user) => {
             currentUser = user;
             if (user) {
                 // ESTADO: LOGADO
-                loginSectionEl.style.display = 'none'; 
-                mainSystemEl.style.display = 'grid';   
-                superControlsEl.style.display = 'flex'; 
-
-                await fetchUserName(user.uid); 
-                
-                setupRealtimeStatsListener(); 
-                
+                loginSectionEl.style.display = 'none';
+                mainSystemEl.style.display = 'grid';
+                superControlsEl.style.display = 'flex';
+                await fetchUserName(user.uid);
+               
+                setupRealtimeStatsListener();
+               
                 startScreenEl.style.display = 'flex';
                 activeProductionEl.style.display = 'none';
-                
-                countCaneta = 0; 
+               
+                countCaneta = 0;
                 countDanificado = 0;
                 updateInterface();
-
             } else {
                 // ESTADO: DESLOGADO
-                loginSectionEl.style.display = 'flex'; 
-                mainSystemEl.style.display = 'none'; 
+                loginSectionEl.style.display = 'flex';
+                mainSystemEl.style.display = 'none';
                 superControlsEl.style.display = 'none';
                 currentOperatorName = 'N/A';
-                
+               
                 startScreenEl.style.display = 'none';
                 activeProductionEl.style.display = 'none';
             }
         });
-
         document.getElementById("logout-btn").onclick = async () => {
              window.signOut(window.authInstance);
              showToast("Turno encerrado. Deslogado.", 'error');
         };
-        
-        // --- FUNÇÕES DE TURNO FIREBASE (Mantidas) ---
+       
+        // --- FUNÇÕES DE TURNO FIREBASE (Atualizadas com WhatsApp) ---
         async function startSession() {
             if(!currentUser) return false;
-            
-            turnoConfig.operador = currentOperatorName; 
+           
+            turnoConfig.operador = currentOperatorName;
             turnoConfig.maquina = document.getElementById('input-maquina').value.trim() || 'Maquina Indefinida';
             turnoConfig.metaPecas = parseInt(document.getElementById('input-meta').value) || 0;
-
+            turnoConfig.whatsappNum = document.getElementById('whatsapp-num').value.trim();
             if(turnoConfig.metaPecas < 100) {
                  showToast("Meta mínima é 100 peças!", "error");
                  return false;
             }
-
             sessionId = window.push(window.ref(window.db, `sessions/${currentUser.uid}`)).key;
-            
+           
             await window.set(window.ref(window.db, `sessions/${currentUser.uid}/${sessionId}`), {
                 operador: turnoConfig.operador,
                 maquina: turnoConfig.maquina,
                 metaPecas: turnoConfig.metaPecas,
+                whatsappNum: turnoConfig.whatsappNum,
                 startTime: new Date().toISOString(),
                 status: 'ATIVO',
                 counts: { countCaneta: 0, countDanificado: 0 }
             });
-            
+           
             document.getElementById('display-operador').textContent = turnoConfig.operador;
             document.getElementById('display-maquina').textContent = turnoConfig.maquina;
             document.getElementById('display-meta').textContent = turnoConfig.metaPecas.toLocaleString('pt-BR');
-            
+           
             return true;
         }
-
+        // ... (resto das funções de Firebase permanecem iguais)
         async function updateFirebaseCounters() {
             if (!sessionId || !currentUser) return;
             await window.set(window.ref(window.db, `sessions/${currentUser.uid}/${sessionId}/counts`), {
                 countCaneta, countDanificado, lastUpdate: new Date().toISOString()
             });
-            
+           
             await window.set(window.ref(window.db, `totals/${currentUser.uid}`), {
                 countCaneta: countCaneta,
                 countDanificado: countDanificado
             });
         }
-        
+       
         async function resetFirebaseCounters() {
             if (!currentUser) return;
             try {
@@ -698,28 +729,26 @@
                 showToast("Erro ao zerar contadores do Firebase", "error");
             }
         }
-        
+       
         function setupRealtimeStatsListener() {
              if (!currentUser) return;
              const statsRef = window.ref(window.db, `totals/${currentUser.uid}`);
-            
+           
             window.onValue(statsRef, (snapshot) => {
                  if (snapshot.exists()) {
                     const data = snapshot.val();
                     const totalCanetas = data.countCaneta || 0;
                     const totalDanificados = data.countDanificado || 0;
                     const totalProcessado = totalCanetas + totalDanificados;
-                    
+                   
                     let taxaRejeicao = 0;
                     if (totalProcessado > 0) {
                         taxaRejeicao = (totalDanificados / totalProcessado) * 100;
                     }
-
                     document.getElementById('realtime-caneta').textContent = totalCanetas;
                     realtimeDanificadoValEl.textContent = totalDanificados;
                     document.getElementById('realtime-total').textContent = totalProcessado;
                     document.getElementById('realtime-taxa').querySelector('strong').textContent = taxaRejeicao.toFixed(2) + "%";
-
                 } else {
                     document.getElementById('realtime-caneta').textContent = 0;
                     realtimeDanificadoValEl.textContent = 0;
@@ -730,178 +759,254 @@
                 console.error("Erro ao escutar estatísticas em tempo real:", error);
             });
         }
-        
-        // --- INÍCIO DO SISTEMA E CONTROLE DE DETECÇÃO ---
-        
+       
+        // --- NOVAS FUNÇÕES PARA RELATÓRIOS E RANKING ---
+        async function getSessionsInPeriod(uid, period) {
+            const now = new Date();
+            let startDate;
+            switch(period) {
+                case 'dia':
+                    startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    break;
+                case 'semana': {
+                    let d = new Date(now);
+                    let day = d.getDay();
+                    d.setDate(d.getDate() - day);
+                    startDate = d;
+                    break;
+                }
+                case 'mes':
+                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                    break;
+            }
+            const sessionsRef = window.ref(window.db, `sessions/${uid}`);
+            const snapshot = await window.get(sessionsRef);
+            let sessions = [];
+            snapshot.forEach((child) => {
+                const session = child.val();
+                const sessionDate = new Date(session.startTime);
+                if (sessionDate >= startDate) {
+                    sessions.push(session.counts || { countCaneta: 0, countDanificado: 0 });
+                }
+            });
+            return sessions;
+        }
+
+        document.getElementById('generate-report').onclick = async () => {
+            if (!currentUser) return;
+            const period = document.getElementById('period-select').value;
+            showToast('Gerando relatório...', 'success');
+            const sessions = await getSessionsInPeriod(currentUser.uid, period);
+            let sumCaneta = 0, sumDanificado = 0;
+            sessions.forEach(s => {
+                sumCaneta += s.countCaneta || 0;
+                sumDanificado += s.countDanificado || 0;
+            });
+            const total = sumCaneta + sumDanificado;
+            const taxa = total > 0 ? ((sumDanificado / total) * 100).toFixed(2) : 0;
+            const reportEl = document.getElementById('report-display');
+            reportEl.innerHTML = `
+                <p><strong>Aprovadas:</strong> ${sumCaneta.toLocaleString()}</p>
+                <p><strong>Rejeitadas:</strong> ${sumDanificado.toLocaleString()}</p>
+                <p><strong>Total:</strong> ${total.toLocaleString()}</p>
+                <p><strong>Taxa de Rejeição:</strong> ${taxa}%</p>
+            `;
+            reportEl.style.display = 'block';
+            document.getElementById('send-whatsapp').style.display = 'block';
+            window.reportMsg = `📊 Relatório ${period.toUpperCase()} - ${turnoConfig.operador}\n🟢 Aprovadas: ${sumCaneta.toLocaleString()}\n🔴 Rejeitadas: ${sumDanificado.toLocaleString()}\n📦 Total: ${total.toLocaleString()}\n📉 Taxa Rejeição: ${taxa}%`;
+        };
+
+        document.getElementById('send-whatsapp').onclick = () => {
+            let num = turnoConfig.whatsappNum || prompt('Digite o número do WhatsApp (ex: 5511999999999)');
+            if (num && window.reportMsg) {
+                window.open(`https://wa.me/${num}?text=${encodeURIComponent(window.reportMsg)}`, '_blank');
+                showToast('Abrindo WhatsApp...', 'success');
+            } else {
+                showToast('Número ou mensagem inválida!', 'error');
+            }
+        };
+
+        document.getElementById('update-ranking').onclick = async () => {
+            showToast('Atualizando ranking...', 'success');
+            const totalsSnapshot = await window.get(window.ref(window.db, 'totals'));
+            let rankings = [];
+            let promises = [];
+            totalsSnapshot.forEach((child) => {
+                const uid = child.key;
+                const totals = child.val();
+                promises.push(
+                    window.get(window.ref(window.db, `users/${uid}`)).then((userSnapshot) => {
+                        if (userSnapshot.exists()) {
+                            const userData = userSnapshot.val();
+                            rankings.push({
+                                name: userData.name || 'N/A',
+                                aprovado: totals.countCaneta || 0
+                            });
+                        }
+                    })
+                );
+            });
+            await Promise.all(promises);
+            rankings.sort((a, b) => b.aprovado - a.aprovado);
+            const html = rankings.slice(0, 10).map((r, i) => 
+                `<li><strong>${i + 1}º</strong> ${r.name}: <strong>${r.aprovado.toLocaleString()}</strong> aprovadas</li>`
+            ).join('');
+            document.getElementById('ranking-list').innerHTML = html || '<li>Nenhum dado encontrado</li>';
+            showToast('Ranking atualizado!', 'success');
+        };
+       
+        // --- INÍCIO DO SISTEMA E CONTROLE DE DETECÇÃO (permanece igual) ---
         startBtn.onclick = async () => {
             const success = await startSession();
             if (success) {
                 await initCameraAndModel();
             }
         };
-
-
+        // ... (todas as outras funções permanecem idênticas ao código original)
         async function initCameraAndModel() {
-            
+           
             startScreenEl.style.display = 'none';
             activeProductionEl.style.display = 'flex';
             statusActiveEl.style.display = 'block';
-            
+           
             // Garante que o display de confiança inicie vazio, mas visível como container
-            confidenceDisplayEl.style.display = 'flex'; 
+            confidenceDisplayEl.style.display = 'flex';
             confidenceDisplayEl.textContent = "INICIALIZANDO...";
-
             try {
                 const modelURL = URL_MODEL + "model.json";
                 const metadataURL = URL_MODEL + "metadata.json";
-
                 statusActiveEl.innerHTML = "Carregando Modelo de IA...";
                 model = await tmImage.load(modelURL, metadataURL);
                 maxPredictions = model.getTotalClasses();
-
-                const flip = true; 
-                webcam = new tmImage.Webcam(400, 400, flip); 
-                
+                const flip = true;
+                webcam = new tmImage.Webcam(400, 400, flip);
+               
                 statusActiveEl.innerHTML = "Acessando Câmera...";
-                
-                await webcam.setup(); 
-                
+               
+                await webcam.setup();
+               
                 webcamContainerEl.innerHTML = "";
                 webcamContainerEl.style.display = 'flex';
                 webcamContainerEl.appendChild(webcam.canvas);
-                
+               
                 if(webcam.canvas) {
-                     webcam.canvas.style.display = 'block'; 
+                     webcam.canvas.style.display = 'block';
                 }
-                
-                await webcam.play(); 
-
+               
+                await webcam.play();
                 liberarEsteira();
                 statusActiveEl.innerHTML = "<strong>TURNO ATIVO</strong> 🟢";
                 statusActiveEl.style.color = "var(--cor-principal)";
                 showToast("Câmera e IA iniciadas com sucesso!", 'success');
-                
+               
                 window.requestAnimationFrame(loop);
-
             } catch (e) {
                 statusEl.textContent = "Erro ao iniciar o sistema: " + e.message;
                 showToast("Erro ao carregar modelo ou câmera. Verifique permissões.", "error");
-                
+               
                 startScreenEl.style.display = 'flex';
                 activeProductionEl.style.display = 'none';
-                confidenceDisplayEl.style.display = 'none'; 
+                confidenceDisplayEl.style.display = 'none';
                 console.error("Erro no carregamento da câmera/modelo:", e);
-                
+               
                 if (webcam && webcam.stop) webcam.stop();
             }
         };
-
         async function loop() {
             if (!isPaused && webcam) {
-                webcam.update(); 
+                webcam.update();
                 predict();
             }
             window.requestAnimationFrame(loop);
         }
-
         async function predict() {
             if (!webcam || esteiraParada) return;
-
             const prediction = await model.predict(webcam.canvas);
             let strongestPrediction = null;
-
             for (let i = 0; i < maxPredictions; i++) {
                 if (!strongestPrediction || prediction[i].probability > strongestPrediction.probability) {
                     strongestPrediction = prediction[i];
                 }
             }
-            
+           
             // 2. Atualiza o display de porcentagem (SEM ASTERISCOS, VISUAL LIMPO)
             if (strongestPrediction) {
-                const probability = strongestPrediction.probability; 
+                const probability = strongestPrediction.probability;
                 const className = strongestPrediction.className;
-                
+               
                 if (className !== "Fundo" && className !== "background") {
-                    
+                   
                     // Saída Limpa: NOME DO OBJETO 99.9%
                     const displayProb = (probability * 100).toFixed(1);
                     confidenceDisplayEl.textContent = `${className.toUpperCase()} ${displayProb}%`;
-                    
+                   
                     // Ajusta a cor para indicar detecção de problema
                     if (className.toLowerCase().includes('danificado')) {
-                         confidenceDisplayEl.style.color = "var(--cor-erro)"; 
+                         confidenceDisplayEl.style.color = "var(--cor-erro)";
                          confidenceDisplayEl.style.borderColor = "var(--cor-erro)";
                     } else {
-                         confidenceDisplayEl.style.color = "var(--cor-principal)"; 
+                         confidenceDisplayEl.style.color = "var(--cor-principal)";
                          confidenceDisplayEl.style.borderColor = "var(--cor-principal)";
                     }
-
                     processDetection(className);
                 } else {
                     confidenceDisplayEl.textContent = `AGUARDANDO...`;
-                    confidenceDisplayEl.style.color = "#555"; 
+                    confidenceDisplayEl.style.color = "#555";
                     confidenceDisplayEl.style.borderColor = "#333";
-                    liberarEsteira(); 
+                    liberarEsteira();
                 }
             } else {
                  liberarEsteira();
             }
-            
+           
         }
-
-
         function processDetection(className) {
-            
+           
             // 1. Inicia/Reseta o timer se o objeto é novo ou se acabou de ser contado
             if (className !== ultimoObjetoDetectado) {
                 ultimoObjetoDetectado = className;
                 detectionStartTime[className] = Date.now();
                 logCommand(`Objeto detectado: ${className.toUpperCase()}. Aguardando confirmação...`);
             }
-
             // 2. Confirmação após o tempo mínimo
             if (Date.now() - detectionStartTime[className] >= CONFIRMATION_TIME) {
-                
+               
                 // Garante que a contagem só ocorra uma vez por objeto
-                if (className === ultimoObjetoDetectado) { 
+                if (className === ultimoObjetoDetectado) {
                     if (className.toLowerCase().includes('caneta')) {
                         countCaneta++;
                         logCommand(`✔️ Caneta APROVADA (Total: ${countCaneta})`);
-                        liberarEsteira(); 
-
+                        liberarEsteira();
                     } else if (className.toLowerCase().includes('danificado')) {
                         countDanificado++;
                         logCommand(`❌ PRODUTO REJEITADO (Total: ${countDanificado})`);
-                        pararEsteira(); 
+                        pararEsteira();
                     }
-                    
+                   
                     updateInterface();
                     updateFirebaseCounters();
                     ultimoObjetoDetectado = null; // Zera para permitir a contagem do próximo
                 }
             }
         }
-        
+       
         // --- CONTROLE DE VISIBILIDADE DO LOG ---
         window.toggleHistoricalLog = () => {
             if (historicalLogContainerEl.style.display === 'none' || historicalLogContainerEl.style.display === '') {
                 historicalLogContainerEl.style.display = 'block';
                 toggleLogBtn.textContent = 'Ocultar Histórico de Ações';
-                commandsLogEl.scrollTop = commandsLogEl.scrollHeight; 
+                commandsLogEl.scrollTop = commandsLogEl.scrollHeight;
             } else {
                 historicalLogContainerEl.style.display = 'none';
                 toggleLogBtn.textContent = 'Mostrar Histórico de Ações';
             }
         }
-
-
         function pararEsteira() {
             esteiraParada = true;
             document.querySelector('#esteira-status').textContent = "PARADA 🛑";
             document.querySelector('#esteira-status').style.background = "var(--cor-erro)";
             logCommand("PARADA - DEFEITO IDENTIFICADO");
         }
-
         function liberarEsteira() {
             if(esteiraParada) {
                 esteiraParada = false;
@@ -910,22 +1015,18 @@
                 logCommand("ESTEIRA OPERANDO");
             }
         }
-
         function updateInterface() {
             countCanetaEl.textContent = countCaneta;
-            countDanificadoEl.textContent = countDanificado; 
+            countDanificadoEl.textContent = countDanificado;
         }
-
         document.getElementById("reset-btn").onclick = async () => {
-            countCaneta = 0; 
+            countCaneta = 0;
             countDanificado = 0;
-            ultimoObjetoDetectado = null; 
+            ultimoObjetoDetectado = null;
             updateInterface();
-            await resetFirebaseCounters(); 
+            await resetFirebaseCounters();
             logCommand("SISTEMA RESETADO");
         };
-
-
         function logCommand(msg) {
             const time = new Date().toLocaleTimeString();
             const div = document.createElement("div");
@@ -936,16 +1037,14 @@
                commandsLogEl.scrollTop = commandsLogEl.scrollHeight;
             }
         }
-
         function showToast(msg, type) {
             const toast = document.getElementById("toast");
             toast.textContent = msg;
             toast.className = `toast ${type} show`;
             setTimeout(() => toast.className = "toast", 3000);
         }
-        
+       
         document.getElementById("emergency-stop").onclick = () => { pararEsteira(); showToast("Parada de Emergência acionada!", "error"); };
-
     </script>
 </body>
 </html>
