@@ -1,0 +1,47 @@
+body {
+    background: #000;
+    color: #0f0;
+    font-family: monospace;
+    display: flex;
+    justify-content: center;
+    padding-top: 20px;
+}
+
+.container {
+    border: 2px solid #0f0;
+    padding: 20px;
+    width: 360px;
+    text-align: center;
+    box-shadow: 0 0 15px #0f0;
+}
+
+h1 {
+    margin-bottom: 15px;
+}
+
+#webcam-container video, 
+#webcam-container canvas {
+    width: 320px;
+    height: 240px;
+    border: 2px solid #0f0;
+    margin-bottom: 10px;
+}
+
+.feedback {
+    margin: 10px 0;
+    font-size: 18px;
+}
+
+.counters {
+    margin-top: 15px;
+}
+
+.counter {
+    margin: 10px 0;
+    font-size: 20px;
+}
+
+#status {
+    margin-top: 20px;
+    opacity: 0.7;
+}
